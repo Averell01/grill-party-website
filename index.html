@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grill Party Announcement</title>
+  <!--
+    This website announces a grill party for next Thursday at 8 PM local time in
+    Bern, Switzerland. It uses a responsive design with accessible semantics and
+    provides a live countdown to the event. The countdown updates once per
+    second and is announced politely to assistive technologies via aria-live.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /*
+      Base styles: clean typography and neutral colours to maximise contrast and
+      readability. Use system fonts to avoid external dependencies.
+    */
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #222;
+      background-color: #fdfdfd;
+      line-height: 1.6;
+    }
+    /* Hero section with a background image and overlay text. The overlay
+       contains the main heading and date/time information. */
+    .hero {
+      position: relative;
+      text-align: center;
+      color: #fff;
+    }
+    .hero img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .hero .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      margin: 0.5em 0 0.3em;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    /* Details section containing the invitation and countdown. */
+    .details {
+      padding: 2rem 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .details h2 {
+      margin-top: 0;
+      font-size: 2rem;
+      color: #222;
+    }
+    /* Countdown container styled as a flexible row. Each unit has its own
+       number and label stacked vertically. */
+    .countdown {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      font-size: 2rem;
+      margin-top: 2rem;
+      color: #222;
+    }
+    .unit {
+      text-align: center;
+      min-width: 4rem;
+    }
+    .number {
+      font-size: 2.6rem;
+      font-weight: bold;
+      line-height: 1;
+    }
+    .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: #555;
+      letter-spacing: 0.05rem;
+    }
+    /* Responsive adjustments for small screens */
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+      .hero p {
+        font-size: 1rem;
+      }
+      .countdown {
+        font-size: 1.2rem;
+        gap: 1rem;
+      }
+      .number {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <!-- Decorative image of a steak on a grill. The alt text describes the scene
+         clearly for screen reader users. -->
+    <img src="grill_steak.jpg"
+         alt="A marinated steak sizzling on a barbecue grill with fresh herbs">
+    <div class="overlay">
+      <h1>Grill Party at Route des Falaises 66</h1>
+      <!-- Date and time expressed explicitly to aid comprehension. -->
+      <p>Thursday, 31 July 2025 — 8:00 PM</p>
+    </div>
+  </header>
+  <main class="details">
+    <h2>You’re invited!</h2>
+    <p>
+      Join us for a relaxed evening of good food and company. We’ll be serving
+      juicy Tomahawk steak fresh off the grill and an assortment of cold beer.
+      Bring your appetite and your best stories—let’s make this summer night
+      memorable!
+    </p>
+    <!-- Countdown timer. The role "timer" and aria-live ensure assistive
+         technologies announce updates politely. The script will inject
+         individual units (days, hours, minutes, seconds) here. -->
+    <div id="countdown" class="countdown" role="timer" aria-live="polite">
+      <!-- dynamic content inserted by JavaScript -->
+    </div>
+  </main>
+  <script>
+    // Countdown timer script
+    (function() {
+      // Determine the target date/time: the event occurs on 31 July 2025 at
+      // 20:00 local time in Europe/Zurich (UTC+2 in summer). ISO 8601 with
+      // explicit offset ensures correct parsing across browsers.
+      const targetDate = new Date('2025-07-31T20:00:00+02:00');
+      const countdownEl = document.getElementById('countdown');
+      /**
+       * Render the countdown each second. When the event time has passed, a
+       * friendly message is displayed. Numbers are padded to two digits to
+       * enhance readability.
+       */
+      function updateCountdown() {
+        const now = new Date();
+        const diff = targetDate.getTime() - now.getTime();
+        if (diff <= 0) {
+          countdownEl.innerHTML = '<span class="unit"><span class="number">00</span><br><span class="label">Time\u2019s up!</span></span>';
+          return;
+        }
+        const seconds = Math.floor(diff / 1000) % 60;
+        const minutes = Math.floor(diff / 1000 / 60) % 60;
+        const hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        // Build markup for each time unit
+        function unitMarkup(num, label) {
+          const padded = String(num).padStart(2, '0');
+          return `<div class="unit"><span class="number">${padded}</span><br><span class="label">${label}</span></div>`;
+        }
+        // Determine singular/plural labels
+        const labels = {
+          day: days === 1 ? 'Day' : 'Days',
+          hour: hours === 1 ? 'Hour' : 'Hours',
+          minute: minutes === 1 ? 'Minute' : 'Minutes',
+          second: seconds === 1 ? 'Second' : 'Seconds'
+        };
+        countdownEl.innerHTML =
+          unitMarkup(days, labels.day) +
+          unitMarkup(hours, labels.hour) +
+          unitMarkup(minutes, labels.minute) +
+          unitMarkup(seconds, labels.second);
+      }
+      // Initial call
+      updateCountdown();
+      // Update every second
+      setInterval(updateCountdown, 1000);
+    })();
+  </script>
+</body>
+</html>
